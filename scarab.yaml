@@ -9,9 +9,6 @@ plugins:
     # Event plugins
     GitPush:
         remote_target: trunk
-    CleanDist: {}
-    RecordPypiUpload: {}
-    CleanupVenv: {}
     IncrementLocalVersion:
         version_file: share/VERSION.txt
         version_cmd: 'cat share/VERSION.txt'
@@ -22,19 +19,8 @@ plugins:
     SetupBuild:
         plugin_class: RunCommand
         command: 'ant -f lang/py/build.xml build'
-    VerifyVersion:
+    StdPublish:
         setup_dir: lang/py/build
-    BuildDist:
-        setup_dir: lang/py/build
-    UploadBuild:
-        plugin_class: UploadToS3
-        bucket_name: yelp-pypi-dev
-        bucket_region: us-west-2
-        key_prefix: ''
-        boto_auth_file: /etc/boto_cfg/pypi.cfg
-        files:
-            - 'dist/{name}-*.tar.gz'
-            - 'dist/{name}-*.whl'
 
 events:
     release:
@@ -48,12 +34,7 @@ events:
         help: 'Verifies version, builds whl and tar.gz of release, and uploads to pypi'
         local:
             - SetupBuild
-            - VerifyVersion
-            - CleanDist
-            - BuildDist
-            - UploadBuild
-            - RecordPypiUpload
-            - CleanupVenv
+            - StdPublish
 
 workflows:
     - Start -> release -> VersionCreated
